@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nitrogen Calculation for Well Displacement/Lift</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 300px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 150px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 150px;
+            margin: 10px auto;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .output p {
+            margin: 10px 0;
+        }
+        .output strong {
+            color: #333;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="color: blue; font-size: 3em; margin: 0;">NETCORE</h1>
+        <p>integrated service limited</p>
+    </div>
+    <div class="container">
+        <h1>Nitrogen Calculation for Well Displacement/Lift</h1>
+        <div class="input-group">
+            <label for="wellDepth">Well Depth (ft):</label>
+            <input type="number" id="wellDepth" step="0.01" min="0">
+        </div>
+        <div class="input-group">
+            <label for="tubingID">Tubing Size (ID in inches):</label>
+            <input type="number" id="tubingID" step="0.01" min="0">
+        </div>
+        <div class="input-group">
+            <label for="BHP">Bottom Hole Pressure (psi):</label>
+            <input type="number" id="BHP" step="0.01" min="0">
+        </div>
+        <div class="input-group">
+            <label for="BHST">Bottom Hole Static Temperature (°F):</label>
+            <input type="number" id="BHST" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="AT">Ambient Temperature (°F):</label>
+            <input type="number" id="AT" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="WHP">Well Head Pressure (psi):</label>
+            <input type="number" id="WHP" step="0.01" min="0">
+        </div>
+        <div class="input-group">
+            <label for="Z">Compressibility Factor:</label>
+            <input type="number" id="Z" step="0.01" min="0">
+        </div>
+        <button onclick="calculateNitrogen()">Calculate</button>
+        <button onclick="window.location.href='references.html'">View Reference Table and Chart</button>
+        <button onclick="window.location.href='tracking.html'">N2 Volume Tracking</button>
+        <div class="output">
+            <p><strong>Average Vertical Temperature (°F):</strong> <span id="avgTemp"></span></p>
+            <p><strong>Average Vertical Pressure (psi):</strong> <span id="avgPressure"></span></p>
+            <p><strong>Nitrogen Volume Factor (SCF/BBL):</strong> <span id="NVF"></span></p>
+            <p><strong>Capacity of Tubing (bbl):</strong> <span id="capacity"></span></p>
+            <p><strong>Total SCF:</strong> <span id="totalSCF"></span></p>
+            <p><strong>N2 Required (gal):</strong> <span id="N2gal"></span></p>
+            <p><strong>Recommended N2 (with cooldown and losses) (gal):</strong> <span id="recommendedN2"></span></p>
+            <p>Note: It is recommended to add about 200gal for N2 cool down to the calculated volume and multiply the total by 1.1 to accommodate losses.</p>
+        </div>
+    </div>
+    <footer>
+        <p>Designed by ibegroup. All rights reserved.</p>
+        <button onclick="window.location.href='mailto:Ibelebechijustin@gmail.com'">Contact</button>
+    </footer>
+    <script>
+        function calculateNitrogen() {
+            // Get input values
+            var wellDepth = parseFloat(document.getElementById('wellDepth').value);
+            var tubingID = parseFloat(document.getElementById('tubingID').value);
+            var BHP = parseFloat(document.getElementById('BHP').value);
+            var BHST = parseFloat(document.getElementById('BHST').value);
+            var AT = parseFloat(document.getElementById('AT').value);
+            var WHP = parseFloat(document.getElementById('WHP').value);
+            var Z = parseFloat(document.getElementById('Z').value);
+
+            // Validate inputs
+            if (isNaN(wellDepth) || wellDepth <= 0) {
+                alert('Please enter a valid positive number for Well Depth.');
+                return;
+            }
+            if (isNaN(tubingID) || tubingID <= 0) {
+                alert('Please enter a valid positive number for Tubing ID.');
+                return;
+            }
+            if (isNaN(BHP) || BHP < 0) {
+                alert('Please enter a valid non-negative number for Bottom Hole Pressure.');
+                return;
+            }
+            if (isNaN(BHST)) {
+                alert('Please enter a valid number for Bottom Hole Static Temperature.');
+                return;
+            }
+            if (isNaN(AT)) {
+                alert('Please enter a valid number for Ambient Temperature.');
+                return;
+            }
+            if (isNaN(WHP) || WHP < 0) {
+                alert('Please enter a valid non-negative number for Well Head Pressure.');
+                return;
+            }
+            if (isNaN(Z) || Z <= 0) {
+                alert('Please enter a valid positive number for Compressibility Factor.');
+                return;
+            }
+
+            // Calculations
+            var avgTemp = (BHST + AT) / 2;
+            var avgPressure = (BHP + WHP) / 2;
+            var NVF = 199.3 * avgPressure / (Z * (avgTemp + 460));
+            var capacity = 0.0009714 * Math.pow(tubingID, 2) * (1.2 * wellDepth);
+            var totalSCF = capacity * NVF;
+            var N2gal = totalSCF / 93.11;
+            var recommendedN2 = (N2gal + 200) * 1.1;
+
+            // Display results
+            document.getElementById('avgTemp').innerText = avgTemp.toFixed(2);
+            document.getElementById('avgPressure').innerText = avgPressure.toFixed(2);
+            document.getElementById('NVF').innerText = NVF.toFixed(2);
+            document.getElementById('capacity').innerText = capacity.toFixed(2);
+            document.getElementById('totalSCF').innerText = totalSCF.toFixed(2);
+            document.getElementById('N2gal').innerText = N2gal.toFixed(2);
+            document.getElementById('recommendedN2').innerText = recommendedN2.toFixed(2);
+        }
+    </script>
+</body>
+</html>
